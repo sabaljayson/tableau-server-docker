@@ -3,10 +3,10 @@ EDITOR=vim
 all: regconfig build
 
 build:
-	docker build -t tfoldi/tableau-server:beta .
+	docker build -t tableau-server .
 
 run: build
-	docker run -ti --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v /run -p 80 tfoldi/tableau-server:beta
+	docker run -ti --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v /run -p 80 tableau-server
 
 clean:
 	docker ps -aq --no-trunc | xargs docker rm
@@ -22,5 +22,5 @@ config/registration_file.json:
 regconfig: config/registration_file.json
 
 stop:
-	docker stop `docker ps | grep tableau-server:beta |head -1| awk -e '{print $$1}'`
+	docker stop `docker ps | grep tableau-server |head -1| awk -e '{print $$1}'`
 

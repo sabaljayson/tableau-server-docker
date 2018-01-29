@@ -1,35 +1,25 @@
-# Run `make run` to get things started
-
 # our image is centos default image with systemd
-FROM centos/systemd
+FROM ubuntu:xenial
 
-# who's your boss?
-MAINTAINER "Tamas Foldi" <tfoldi@starschema.net>
+MAINTAINER "Fabien Antoine" <fabien.antoine@m4x.org>
 
 # this is the version what we're building
-ENV TABLEAU_VERSION="10.5-beta5" \
-    LANG=en_US.UTF-8
+ENV TABLEAU_VERSION="10-5-0" \
+    LANG=fr_FR.UTF-8
 
-# make systemd dbus visible 
-VOLUME /sys/fs/cgroup /run /tmp /var/opt/tableau
+COPY tableau-server-${TABLEAU_VERSION}_amd64.deb .
+COPY vertica-client-9.0.0-1.x86_64.tar.gz .
 
 # Install core bits and their deps:w
-RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
-    yum install -y iproute curl sudo vim && \
-    adduser tsm && \
-    (echo tsm:tsm | chpasswd) && \
-    (echo 'tsm ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/tsm) && \
-    mkdir -p  /run/systemd/system /opt/tableau/docker_build && \
-    yum install -y \
-             "https://beta.tableau.com/linux_files/tableau-server-automated-installer-${TABLEAU_VERSION}.noarch.rpm" \
-             "https://beta.tableau.com/linux_files/tableau-server-${TABLEAU_VERSION}.x86_64.rpm"  \
-             "https://beta.tableau.com/linux_driver/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm"  && \
-    rm -rf /var/tmp/yum-* 
-
+RUN apt-get upgrade -y && \
+    apt-get install systemd ip &&\
+    dpkg -i --force-all tableau-server-${TABLEAU_VERSION}_amd64.deb && \
+    apt-get install -y -f
 
 COPY config/* /opt/tableau/docker_build/
 
 RUN mkdir -p /etc/systemd/system/ && \
+    cd /opt/tableau/tableau_server/packages/scripts.${TABLEAU_VERSION}/ && \    
     cp /opt/tableau/docker_build/tableau_server_install.service /etc/systemd/system/ && \
     systemctl enable tableau_server_install
 
