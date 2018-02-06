@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  tableau-server:
+    build: .
+    image: tableau-server
+    container_name: tableau-server
+    volumes:
+      - ./data:/var/opt/tableau
+      - ./run:/run
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    ports:
+      - "80:80"
+      - "8085:8085"
+    privileged: true
+    

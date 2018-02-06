@@ -5,8 +5,8 @@ all: regconfig build
 build:
 	docker build -t tableau-server .
 
-run: 
-	docker run -ti --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v /run -p 80 tableau-server
+run:
+	docker-compose up -d
 
 clean:
 	docker ps -aq --no-trunc | xargs docker rm
