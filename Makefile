@@ -5,14 +5,14 @@ all: regconfig build
 build:
 	docker build -t tableau-server .
 
-run: build
+run: 
 	docker run -ti --privileged -v /sys/fs/cgroup:/sys/fs/cgroup -v /run -p 80 tableau-server
 
 clean:
 	docker ps -aq --no-trunc | xargs docker rm
 
 exec:
-	docker exec -ti `docker ps | grep tableau-server:beta |head -1 | awk -e '{print $$1}'` /bin/bash
+	docker exec -ti `docker ps | grep tableau-server |head -1 | awk -e '{print $$1}'` /bin/bash
 
 
 config/registration_file.json: 

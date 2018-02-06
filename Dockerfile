@@ -1,25 +1,37 @@
-# our image is centos default image with systemd
-FROM ubuntu:xenial
+# Run `make run` to get things started
 
-MAINTAINER "Fabien Antoine" <fabien.antoine@m4x.org>
+# our image is centos default image with systemd
+FROM centos/systemd
+
+# who's your boss?
+MAINTAINER "Tamas Foldi" <tfoldi@starschema.net>
 
 # this is the version what we're building
 ENV TABLEAU_VERSION="10-5-0" \
-    LANG=fr_FR.UTF-8
+    LANG=en_US.UTF-8
 
-COPY tableau-server-${TABLEAU_VERSION}_amd64.deb .
-COPY vertica-client-9.0.0-1.x86_64.tar.gz .
+# make systemd dbus visible 
+VOLUME /sys/fs/cgroup /run /tmp /var/opt/tableau
+
+COPY tableau-tabcmd-${TABLEAU_VERSION}.noarch.rpm /var/tmp/
+COPY tableau-server-${TABLEAU_VERSION}.x86_64.rpm /var/tmp/
 
 # Install core bits and their deps:w
-RUN apt-get upgrade -y && \
-    apt-get install systemd ip &&\
-    dpkg -i --force-all tableau-server-${TABLEAU_VERSION}_amd64.deb && \
-    apt-get install -y -f
+RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+    yum install -y iproute curl sudo vim && \
+    adduser tsm && \
+    (echo tsm:tsm | chpasswd) && \
+    (echo 'tsm ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/tsm) && \
+    mkdir -p  /run/systemd/system /opt/tableau/docker_build && \
+    yum install -y \
+	    /var/tmp/tableau-tabcmd-${TABLEAU_VERSION}.noarch.rpm \
+	    /var/tmp/tableau-server-${TABLEAU_VERSION}.x86_64.rpm &&\
+    rm -rf /var/tmp/*rpm 
+
 
 COPY config/* /opt/tableau/docker_build/
 
 RUN mkdir -p /etc/systemd/system/ && \
-    cd /opt/tableau/tableau_server/packages/scripts.${TABLEAU_VERSION}/ && \    
     cp /opt/tableau/docker_build/tableau_server_install.service /etc/systemd/system/ && \
     systemctl enable tableau_server_install
 
