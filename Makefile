@@ -19,7 +19,7 @@ ifeq ("$(wildcard /usr/bin/docker)","")
    		stable"
    	sudo apt-get update
 		sudo apt-get install -y docker-ce
-
+endif
 
 network: 
 	@docker network create latelier 2> /dev/null; true
