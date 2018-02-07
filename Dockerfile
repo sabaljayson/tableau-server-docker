@@ -3,8 +3,7 @@
 # our image is centos default image with systemd
 FROM centos/systemd
 
-# who's your boss?
-MAINTAINER "Tamas Foldi" <tfoldi@starschema.net>
+MAINTAINER "Fabien ANTOINE" <fabien.antoine@m4x.org>
 
 # this is the version what we're building
 ENV TABLEAU_VERSION="10-5-0" \
